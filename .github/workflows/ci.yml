@@ -34,6 +34,11 @@ jobs:
           go mod tidy
           git diff --exit-code -- go.mod go.sum
 
+      - name: Verify generated README
+        run: |
+          go generate ./...
+          git diff --exit-code -- README.md
+
       - name: Verify formatting
         run: test -z "$(gofmt -l .)"
 

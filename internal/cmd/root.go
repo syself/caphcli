@@ -13,10 +13,11 @@ func NewRootCommand() *cobra.Command {
 	data.RegisterEmbeddedInstallImageTGZ()
 
 	rootCmd := &cobra.Command{
-		Use:           "caphcli",
-		Short:         "CAPH developer and operations CLI",
-		SilenceUsage:  true,
-		SilenceErrors: false,
+		Use:               "caphcli",
+		Short:             "CAPH developer and operations CLI",
+		DisableAutoGenTag: true,
+		SilenceUsage:      true,
+		SilenceErrors:     false,
 	}
 
 	rootCmd.AddCommand(newCheckBMServersCommand())
