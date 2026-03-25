@@ -9,37 +9,13 @@ import (
 	caphcmd "github.com/syself/caphcli/internal/cmd"
 )
 
-const readmeTemplate = `# caphcli
+const (
+	readmePath  = "README.md"
+	startMarker = "<!-- readmegen:cli-help:start -->"
+	endMarker   = "<!-- readmegen:cli-help:end -->"
+)
 
-` + "`caphcli`" + ` is a standalone CLI for CAPH bare-metal provisioning checks.
-
-It currently exposes the ` + "`check-bm-servers`" + ` command that was extracted from CAPH PR ` + "`#1873`" + ` and moved into this repository.
-
-## Build
-
-` + "```bash" + `
-go build .
-` + "```" + `
-
-## Required Environment Variables
-
-- ` + "`HETZNER_ROBOT_USER`" + ` and ` + "`HETZNER_ROBOT_PASSWORD`" + ` for Hetzner Robot API access.
-- ` + "`SSH_KEY_NAME`" + ` for the Robot SSH key name to use or create.
-- One of ` + "`HETZNER_SSH_PUB_PATH`" + ` or ` + "`HETZNER_SSH_PUB`" + ` for the SSH public key.
-- One of ` + "`HETZNER_SSH_PRIV_PATH`" + ` or ` + "`HETZNER_SSH_PRIV`" + ` for the SSH private key.
-
-## Keeping This README Up To Date
-
-The official Cobra helper for generated command docs is ` + "`github.com/spf13/cobra/doc`" + `.  
-This repo keeps the help blocks below in sync with the actual command tree via:
-
-` + "```bash" + `
-go generate ./...
-` + "```" + `
-
-That runs ` + "`go run ./internal/tools/readmegen`" + `, which rebuilds this README from the live Cobra commands.
-
-## CLI Help
+const generatedSectionTemplate = `## CLI Help
 
 ### ` + "`caphcli --help`" + `
 
@@ -65,11 +41,21 @@ func main() {
 		fail(err)
 	}
 
-	readme := strings.ReplaceAll(readmeTemplate, "{{ROOT_HELP}}", strings.TrimSpace(rootHelp))
-	readme = strings.ReplaceAll(readme, "{{CHECK_HELP}}", strings.TrimSpace(checkHelp))
+	generatedSection := strings.ReplaceAll(generatedSectionTemplate, "{{ROOT_HELP}}", strings.TrimSpace(rootHelp))
+	generatedSection = strings.ReplaceAll(generatedSection, "{{CHECK_HELP}}", strings.TrimSpace(checkHelp))
 
-	if err := os.WriteFile("README.md", []byte(readme), 0o644); err != nil {
-		fail(fmt.Errorf("write README.md: %w", err))
+	readme, err := os.ReadFile(readmePath)
+	if err != nil {
+		fail(fmt.Errorf("read %s: %w", readmePath, err))
+	}
+
+	updatedReadme, err := replaceMarkedSection(string(readme), generatedSection)
+	if err != nil {
+		fail(err)
+	}
+
+	if err := os.WriteFile(readmePath, []byte(updatedReadme), 0o644); err != nil {
+		fail(fmt.Errorf("write %s: %w", readmePath, err))
 	}
 }
 
@@ -90,4 +76,24 @@ func renderHelp(args ...string) (string, error) {
 func fail(err error) {
 	_, _ = fmt.Fprintf(os.Stderr, "readmegen: %v\n", err)
 	os.Exit(1)
+}
+
+func replaceMarkedSection(readme string, generatedSection string) (string, error) {
+	start := strings.Index(readme, startMarker)
+	if start == -1 {
+		return "", fmt.Errorf("missing start marker %q in %s", startMarker, readmePath)
+	}
+
+	searchFrom := start + len(startMarker)
+	endOffset := strings.Index(readme[searchFrom:], endMarker)
+	if endOffset == -1 {
+		return "", fmt.Errorf("missing end marker %q in %s", endMarker, readmePath)
+	}
+
+	end := searchFrom + endOffset
+	if start > end {
+		return "", fmt.Errorf("invalid marker order in %s", readmePath)
+	}
+
+	return readme[:searchFrom] + "\n\n" + strings.TrimSpace(generatedSection) + "\n\n" + readme[end:], nil
 }

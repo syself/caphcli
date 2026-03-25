@@ -1,32 +1,18 @@
 # caphcli
 
-`caphcli` is a standalone CLI for CAPH bare-metal provisioning checks.
-
-It currently exposes the `check-bm-servers` command that was extracted from CAPH PR `#1873` and moved into this repository.
-
-## Build
-
-```bash
-go build .
-```
+`caphcli` is a standalone CLI for [Cluster API Provider
+Hetzner](https://github.com/syself/cluster-api-provider-hetzner/)
 
 ## Required Environment Variables
+
+Depending on the command, these environment variables are needed.
 
 - `HETZNER_ROBOT_USER` and `HETZNER_ROBOT_PASSWORD` for Hetzner Robot API access.
 - `SSH_KEY_NAME` for the Robot SSH key name to use or create.
 - One of `HETZNER_SSH_PUB_PATH` or `HETZNER_SSH_PUB` for the SSH public key.
 - One of `HETZNER_SSH_PRIV_PATH` or `HETZNER_SSH_PRIV` for the SSH private key.
 
-## Keeping This README Up To Date
-
-The official Cobra helper for generated command docs is `github.com/spf13/cobra/doc`.  
-This repo keeps the help blocks below in sync with the actual command tree via:
-
-```bash
-go generate ./...
-```
-
-That runs `go run ./internal/tools/readmegen`, which rebuilds this README from the live Cobra commands.
+<!-- readmegen:cli-help:start -->
 
 ## CLI Help
 
@@ -84,3 +70,5 @@ Flags:
       --timeout-wait-os duration             Timeout for waiting until installed OS is reachable (default 6m0s)
       --timeout-wait-rescue duration         Timeout for waiting until rescue SSH is reachable (default 6m0s)
 ```
+
+<!-- readmegen:cli-help:end -->
