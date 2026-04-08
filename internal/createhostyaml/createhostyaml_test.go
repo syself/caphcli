@@ -1,4 +1,4 @@
-package createhosttemplate
+package createhostyaml
 
 import (
 	"strings"

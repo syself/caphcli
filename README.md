@@ -23,7 +23,7 @@ go run github.com/syself/caphcli@latest -h
 If you have new Hetzner Baremetal (Robot) Server, then create a HetznerBareMetalHost YAML file:
 
 ```console
-go run github.com/syself/caphcli@latest create-host-template 1234567 1234567.yaml
+go run github.com/syself/caphcli@latest create-host-yaml 1234567 1234567.yaml
 ```
 
 This will create a HetznerBareMetalHost YAML file: `1234567.yaml`
@@ -47,10 +47,10 @@ Usage:
   caphcli [command]
 
 Available Commands:
-  check-bm-servers     Validate rescue and provisioning reliability for one bare-metal server
-  completion           Generate the autocompletion script for the specified shell
-  create-host-template Generate a HetznerBareMetalHost template for one Robot server
-  help                 Help about any command
+  check-bm-servers Validate rescue and provisioning reliability for one bare-metal server
+  completion       Generate the autocompletion script for the specified shell
+  create-host-yaml Generate a HetznerBareMetalHost YAML file for one Robot server
+  help             Help about any command
 
 Flags:
   -h, --help   help for caphcli
@@ -93,25 +93,25 @@ Flags:
       --timeout-wait-rescue duration         Timeout for waiting until rescue SSH is reachable (default 6m0s)
 ```
 
-### `caphcli create-host-template --help`
+### `caphcli create-host-yaml --help`
 
 ```text
-Generate a HetznerBareMetalHost YAML template for one Hetzner Robot server.
+Generate a HetznerBareMetalHost YAML file for one Hetzner Robot server.
 
 The command talks directly to Hetzner Robot, ensures rescue SSH access, reboots
 the target server into rescue once, inspects the available disks, and writes a
-template YAML to the requested output file. Progress and confirmation prompts go to stderr.
+YAML file to the requested output path. Progress and confirmation prompts go to stderr.
 
 Usage:
-  caphcli create-host-template SERVER_ID OUTPUT_FILE [flags]
+  caphcli create-host-yaml SERVER_ID OUTPUT_FILE [flags]
 
 Examples:
-  caphcli create-host-template 1751550 host.yaml
-  caphcli create-host-template --force --name bm-e2e-1751550 1751550 host.yaml
+  caphcli create-host-yaml 1751550 host.yaml
+  caphcli create-host-yaml --force --name bm-e2e-1751550 1751550 host.yaml
 
 Flags:
       --force                              Skip the reboot confirmation prompt
-  -h, --help                               help for create-host-template
+  -h, --help                               help for create-host-yaml
       --name string                        metadata.name for the generated HetznerBareMetalHost (default: bm-SERVER_ID)
       --poll-interval duration             Polling interval while waiting for rescue SSH (default 10s)
       --timeout-activate-rescue duration   Timeout for activating rescue boot (default 45s)

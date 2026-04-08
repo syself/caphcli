@@ -29,10 +29,10 @@ const generatedSectionTemplate = `## CLI Help
 {{CHECK_HELP}}
 ` + "```" + `
 
-### ` + "`caphcli create-host-template --help`" + `
+### ` + "`caphcli create-host-yaml --help`" + `
 
 ` + "```text" + `
-{{CREATE_HOST_TEMPLATE_HELP}}
+{{CREATE_HOST_YAML_HELP}}
 ` + "```" + `
 `
 
@@ -47,14 +47,14 @@ func main() {
 		fail(err)
 	}
 
-	createHostTemplateHelp, err := renderHelp("create-host-template")
+	createHostYAMLHelp, err := renderHelp("create-host-yaml")
 	if err != nil {
 		fail(err)
 	}
 
 	generatedSection := strings.ReplaceAll(generatedSectionTemplate, "{{ROOT_HELP}}", strings.TrimSpace(rootHelp))
 	generatedSection = strings.ReplaceAll(generatedSection, "{{CHECK_HELP}}", strings.TrimSpace(checkHelp))
-	generatedSection = strings.ReplaceAll(generatedSection, "{{CREATE_HOST_TEMPLATE_HELP}}", strings.TrimSpace(createHostTemplateHelp))
+	generatedSection = strings.ReplaceAll(generatedSection, "{{CREATE_HOST_YAML_HELP}}", strings.TrimSpace(createHostYAMLHelp))
 
 	readme, err := os.ReadFile(readmePath)
 	if err != nil {

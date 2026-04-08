@@ -21,7 +21,7 @@ func NewRootCommand() *cobra.Command {
 	}
 
 	rootCmd.AddCommand(newCheckBMServersCommand())
-	rootCmd.AddCommand(newCreateHostTemplateCommand())
+	rootCmd.AddCommand(newCreateHostYAMLCommand())
 
 	return rootCmd
 }

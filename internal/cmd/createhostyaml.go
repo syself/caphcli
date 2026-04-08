@@ -8,25 +8,25 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/syself/caphcli/internal/createhosttemplate"
+	"github.com/syself/caphcli/internal/createhostyaml"
 	"github.com/syself/caphcli/internal/provisioncheck"
 )
 
-func newCreateHostTemplateCommand() *cobra.Command {
-	cfg := createhosttemplate.DefaultConfig()
+func newCreateHostYAMLCommand() *cobra.Command {
+	cfg := createhostyaml.DefaultConfig()
 	cfg.Input = os.Stdin
 	cfg.LogOutput = os.Stderr
 
 	cmd := &cobra.Command{
-		Use:   "create-host-template SERVER_ID OUTPUT_FILE",
-		Short: "Generate a HetznerBareMetalHost template for one Robot server",
-		Long: `Generate a HetznerBareMetalHost YAML template for one Hetzner Robot server.
+		Use:   "create-host-yaml SERVER_ID OUTPUT_FILE",
+		Short: "Generate a HetznerBareMetalHost YAML file for one Robot server",
+		Long: `Generate a HetznerBareMetalHost YAML file for one Hetzner Robot server.
 
 The command talks directly to Hetzner Robot, ensures rescue SSH access, reboots
 the target server into rescue once, inspects the available disks, and writes a
-template YAML to the requested output file. Progress and confirmation prompts go to stderr.`,
-		Example: `  caphcli create-host-template 1751550 host.yaml
-  caphcli create-host-template --force --name bm-e2e-1751550 1751550 host.yaml`,
+YAML file to the requested output path. Progress and confirmation prompts go to stderr.`,
+		Example: `  caphcli create-host-yaml 1751550 host.yaml
+  caphcli create-host-yaml --force --name bm-e2e-1751550 1751550 host.yaml`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(_ *cobra.Command, args []string) error {
 			serverID, err := strconv.Atoi(args[0])
@@ -47,8 +47,8 @@ template YAML to the requested output file. Progress and confirmation prompts go
 			}()
 			cfg.Output = f
 
-			if err := createhosttemplate.Run(context.Background(), cfg); err != nil {
-				return fmt.Errorf("caphcli create-host-template failed for server %d: %w", cfg.ServerID, err)
+			if err := createhostyaml.Run(context.Background(), cfg); err != nil {
+				return fmt.Errorf("caphcli create-host-yaml failed for server %d: %w", cfg.ServerID, err)
 			}
 
 			if err := f.Close(); err != nil {

@@ -361,6 +361,7 @@ func (r *runner) run(ctx context.Context) error {
 		}
 	}
 
+	_, _ = fmt.Fprintln(r.out)
 	r.logf("all checks passed: machine %q (serverID=%d) completed two rescue+install+boot cycles", r.host.Name, r.host.Spec.ServerID)
 	return nil
 }
