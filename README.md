@@ -12,6 +12,28 @@ Depending on the command, these environment variables are needed.
 - One of `HETZNER_SSH_PUB_PATH` or `HETZNER_SSH_PUB` for the SSH public key.
 - One of `HETZNER_SSH_PRIV_PATH` or `HETZNER_SSH_PRIV` for the SSH private key.
 
+## Common Usage
+
+If you have Go installed, the easiest way is to run the code like this:
+
+```console
+go run github.com/syself/caphcli@latest -h
+```
+
+If you have new Hetzner Baremetal (Robot) Server, then create a HetznerBareMetalHost YAML file:
+
+```console
+go run github.com/syself/caphcli@latest create-host-template 1234567 1234567.yaml
+```
+
+This will create a HetznerBareMetalHost YAML file: `1234567.yaml`
+
+After that you can check if the rescue system is reachable reliably:
+
+```console
+go run  github.com/syself/caphcli@latest check-bm-servers 1234567.yaml
+```
+
 <!-- readmegen:cli-help:start -->
 
 ## CLI Help
@@ -25,9 +47,10 @@ Usage:
   caphcli [command]
 
 Available Commands:
-  check-bm-servers Validate rescue and provisioning reliability for one bare-metal server
-  completion       Generate the autocompletion script for the specified shell
-  help             Help about any command
+  check-bm-servers     Validate rescue and provisioning reliability for one bare-metal server
+  completion           Generate the autocompletion script for the specified shell
+  create-host-template Generate a HetznerBareMetalHost template for one Robot server
+  help                 Help about any command
 
 Flags:
   -h, --help   help for caphcli
@@ -45,15 +68,14 @@ HetznerBareMetalHost objects and then talks directly to Hetzner Robot plus the
 target server.
 
 Usage:
-  caphcli check-bm-servers [flags]
+  caphcli check-bm-servers FILE [flags]
 
 Examples:
   caphcli check-bm-servers \
-    --file test/e2e/data/infrastructure-hetzner/v1beta1/bases/hetznerbaremetalhosts.yaml \
+    test/e2e/data/infrastructure-hetzner/v1beta1/bases/hetznerbaremetalhosts.yaml \
     --name bm-e2e-1731561
 
 Flags:
-      --file string                          Path to a local YAML file containing HetznerBareMetalHost objects (required)
       --force                                Skip the destructive-action confirmation prompt
   -h, --help                                 help for check-bm-servers
       --image-path string                    Installimage IMAGE path for operating system inside the Hetzner rescue system (default "/root/.oldroot/nfs/images/Ubuntu-2404-noble-amd64-base.tar.gz")
@@ -69,6 +91,35 @@ Flags:
       --timeout-reboot-rescue duration       Timeout for requesting reboot to rescue (default 45s)
       --timeout-wait-os duration             Timeout for waiting until installed OS is reachable (default 6m0s)
       --timeout-wait-rescue duration         Timeout for waiting until rescue SSH is reachable (default 6m0s)
+```
+
+### `caphcli create-host-template --help`
+
+```text
+Generate a HetznerBareMetalHost YAML template for one Hetzner Robot server.
+
+The command talks directly to Hetzner Robot, ensures rescue SSH access, reboots
+the target server into rescue once, inspects the available disks, and writes a
+template YAML to the requested output file. Progress and confirmation prompts go to stderr.
+
+Usage:
+  caphcli create-host-template SERVER_ID OUTPUT_FILE [flags]
+
+Examples:
+  caphcli create-host-template 1751550 host.yaml
+  caphcli create-host-template --force --name bm-e2e-1751550 1751550 host.yaml
+
+Flags:
+      --force                              Skip the reboot confirmation prompt
+  -h, --help                               help for create-host-template
+      --name string                        metadata.name for the generated HetznerBareMetalHost (default: bm-SERVER_ID)
+      --poll-interval duration             Polling interval while waiting for rescue SSH (default 10s)
+      --timeout-activate-rescue duration   Timeout for activating rescue boot (default 45s)
+      --timeout-ensure-ssh-key duration    Timeout for ensuring SSH key in Robot (default 1m0s)
+      --timeout-fetch-server duration      Timeout for fetching server details from Robot (default 30s)
+      --timeout-load-input duration        Timeout for env loading + initial validation (default 30s)
+      --timeout-reboot-rescue duration     Timeout for requesting reboot to rescue (default 45s)
+      --timeout-wait-rescue duration       Timeout for waiting until rescue SSH is reachable (default 6m0s)
 ```
 
 <!-- readmegen:cli-help:end -->

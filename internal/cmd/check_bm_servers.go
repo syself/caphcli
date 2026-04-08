@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 
@@ -17,7 +16,7 @@ func newCheckBMServersCommand() *cobra.Command {
 	cfg.Output = os.Stdout
 
 	cmd := &cobra.Command{
-		Use:   "check-bm-servers",
+		Use:   "check-bm-servers FILE",
 		Short: "Validate rescue and provisioning reliability for one bare-metal server",
 		Long: `Validate rescue and provisioning reliability for one HetznerBareMetalHost from a local YAML file.
 
@@ -25,15 +24,14 @@ The command does not talk to Kubernetes. It reads one local YAML file containing
 HetznerBareMetalHost objects and then talks directly to Hetzner Robot plus the
 target server.`,
 		Example: `  caphcli check-bm-servers \
-    --file test/e2e/data/infrastructure-hetzner/v1beta1/bases/hetznerbaremetalhosts.yaml \
+    test/e2e/data/infrastructure-hetzner/v1beta1/bases/hetznerbaremetalhosts.yaml \
     --name bm-e2e-1731561`,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			if cfg.HbmhYAMLFile == "" {
-				return errors.New("--file is required")
-			}
+		Args: cobra.ExactArgs(1),
+		RunE: func(_ *cobra.Command, args []string) error {
+			cfg.HbmhYAMLFile = args[0]
 
 			if _, err := os.Stat(cfg.HbmhYAMLFile); err != nil {
-				return fmt.Errorf("check --file: %w", err)
+				return fmt.Errorf("check FILE: %w", err)
 			}
 
 			if err := provisioncheck.Run(context.Background(), cfg); err != nil {
@@ -45,7 +43,6 @@ target server.`,
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&cfg.HbmhYAMLFile, "file", "", "Path to a local YAML file containing HetznerBareMetalHost objects (required)")
 	flags.StringVar(&cfg.Name, "name", "", "HetznerBareMetalHost metadata.name. Optional if YAML contains exactly one host")
 	flags.StringVar(&cfg.ImagePath, "image-path", provisioncheck.DefaultUbuntu2404ImagePath, "Installimage IMAGE path for operating system inside the Hetzner rescue system")
 	flags.BoolVar(&cfg.Force, "force", false, "Skip the destructive-action confirmation prompt")
