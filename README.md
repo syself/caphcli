@@ -28,15 +28,15 @@ go run github.com/syself/caphcli@latest create-host-yaml 1234567 1234567.yaml
 
 This will create a HetznerBareMetalHost YAML file: `1234567.yaml`
 
-The generated host starts with `spec.maintenanceMode: true`, and the command prints a hint to run `check-bm-servers` next.
+The generated host starts with `spec.maintenanceMode: true`, and the command prints a hint to run `check-bm-server` next.
 
 After that you can check if the rescue system is reachable reliably:
 
 ```console
-go run  github.com/syself/caphcli@latest check-bm-servers 1234567.yaml
+go run github.com/syself/caphcli@latest check-bm-server 1234567.yaml
 ```
 
-`check-bm-servers` refuses to run unless `spec.maintenanceMode` is `true`. After a successful check it prints a hint to disable maintenance mode again.
+`check-bm-server` refuses to run unless `spec.maintenanceMode` is `true`. After a successful check it prints a hint to disable maintenance mode again.
 
 <!-- readmegen:cli-help:start -->
 
@@ -51,7 +51,7 @@ Usage:
   caphcli [command]
 
 Available Commands:
-  check-bm-servers Validate rescue and provisioning reliability for one bare-metal server
+  check-bm-server  Validate rescue and provisioning reliability for one bare-metal server
   completion       Generate the autocompletion script for the specified shell
   create-host-yaml Generate a HetznerBareMetalHost YAML file for one Robot server
   help             Help about any command
@@ -62,7 +62,7 @@ Flags:
 Use "caphcli [command] --help" for more information about a command.
 ```
 
-### `caphcli check-bm-servers --help`
+### `caphcli check-bm-server --help`
 
 ```text
 Validate rescue and provisioning reliability for one HetznerBareMetalHost from a local YAML file.
@@ -72,16 +72,16 @@ HetznerBareMetalHost objects and then talks directly to Hetzner Robot plus the
 target server.
 
 Usage:
-  caphcli check-bm-servers FILE [flags]
+  caphcli check-bm-server FILE [flags]
 
 Examples:
-  caphcli check-bm-servers \
+  caphcli check-bm-server \
     test/e2e/data/infrastructure-hetzner/v1beta1/bases/hetznerbaremetalhosts.yaml \
     --name bm-e2e-1731561
 
 Flags:
       --force                                Skip the destructive-action confirmation prompt
-  -h, --help                                 help for check-bm-servers
+  -h, --help                                 help for check-bm-server
       --image-path string                    Installimage IMAGE path for operating system inside the Hetzner rescue system (default "/root/.oldroot/nfs/images/Ubuntu-2404-noble-amd64-base.tar.gz")
       --name string                          HetznerBareMetalHost metadata.name. Optional if YAML contains exactly one host
       --poll-interval duration               Polling interval for wait steps (default 10s)

@@ -56,7 +56,7 @@ YAML file to the requested output path. Progress and confirmation prompts go to 
 			}
 			f = nil
 			_, _ = fmt.Fprintf(cfg.LogOutput, "✓ created %s\n", outputFile)
-			_, _ = fmt.Fprintf(cfg.LogOutput, "Hint: run `caphcli check-bm-servers %s` next.\n", outputFile)
+			_, _ = fmt.Fprintf(cfg.LogOutput, "Hint: run `caphcli check-bm-server %s` next.\n", outputFile)
 
 			return nil
 		},

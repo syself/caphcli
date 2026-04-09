@@ -828,7 +828,7 @@ func validateHostForProvisionCheck(host infrav1.HetznerBareMetalHost) error {
 		return fmt.Errorf("host %q has no spec.rootDeviceHints", host.Name)
 	}
 	if host.Spec.MaintenanceMode == nil || !*host.Spec.MaintenanceMode {
-		return fmt.Errorf("host %q must set spec.maintenanceMode: true before running check-bm-servers", host.Name)
+		return fmt.Errorf("host %q must set spec.maintenanceMode: true before running check-bm-server", host.Name)
 	}
 	return nil
 }

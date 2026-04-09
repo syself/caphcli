@@ -20,7 +20,7 @@ func NewRootCommand() *cobra.Command {
 		SilenceErrors:     false,
 	}
 
-	rootCmd.AddCommand(newCheckBMServersCommand())
+	rootCmd.AddCommand(newCheckBMServerCommand())
 	rootCmd.AddCommand(newCreateHostYAMLCommand())
 
 	return rootCmd
