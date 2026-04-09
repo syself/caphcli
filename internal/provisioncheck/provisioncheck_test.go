@@ -19,7 +19,10 @@ package provisioncheck
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	infrav1 "github.com/syself/cluster-api-provider-hetzner/api/v1beta1"
 )
 
 func TestLoadHostsFromHBMHYAMLFile(t *testing.T) {
@@ -98,6 +101,69 @@ items:
 				if hosts[i].Name != wantName {
 					t.Fatalf("hosts[%d].Name = %q, want %q", i, hosts[i].Name, wantName)
 				}
+			}
+		})
+	}
+}
+
+func TestSelectHostRequiresMaintenanceMode(t *testing.T) {
+	t.Parallel()
+
+	trueValue := true
+	falseValue := false
+
+	tests := []struct {
+		name    string
+		host    infrav1.HetznerBareMetalHost
+		wantErr string
+	}{
+		{
+			name: "maintenance mode unset",
+			host: infrav1.HetznerBareMetalHost{
+				Spec: infrav1.HetznerBareMetalHostSpec{
+					RootDeviceHints: &infrav1.RootDeviceHints{WWN: "0x1"},
+				},
+			},
+			wantErr: `must set spec.maintenanceMode: true`,
+		},
+		{
+			name: "maintenance mode false",
+			host: infrav1.HetznerBareMetalHost{
+				Spec: infrav1.HetznerBareMetalHostSpec{
+					RootDeviceHints: &infrav1.RootDeviceHints{WWN: "0x1"},
+					MaintenanceMode: &falseValue,
+				},
+			},
+			wantErr: `must set spec.maintenanceMode: true`,
+		},
+		{
+			name: "maintenance mode true",
+			host: infrav1.HetznerBareMetalHost{
+				Spec: infrav1.HetznerBareMetalHostSpec{
+					RootDeviceHints: &infrav1.RootDeviceHints{WWN: "0x1"},
+					MaintenanceMode: &trueValue,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			tt.host.Name = tt.name
+			_, err := selectHost([]infrav1.HetznerBareMetalHost{tt.host}, "")
+			if tt.wantErr == "" {
+				if err != nil {
+					t.Fatalf("selectHost() error = %v", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatalf("selectHost() error = nil, want substring %q", tt.wantErr)
+			}
+			if !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("selectHost() error = %q, want substring %q", err.Error(), tt.wantErr)
 			}
 		})
 	}

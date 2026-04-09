@@ -72,7 +72,7 @@ func TestRenderTemplate(t *testing.T) {
 		`serverID: 1751550 # Robot name: ci-box-1751550, IP: 144.76.74.13`,
 		`wwn: "0x0001"`,
 		`# wwn: "0x0002"`,
-		`maintenanceMode: false`,
+		`maintenanceMode: true`,
 		`description: "ci-box-1751550"`,
 	}
 

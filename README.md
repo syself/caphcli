@@ -28,11 +28,15 @@ go run github.com/syself/caphcli@latest create-host-yaml 1234567 1234567.yaml
 
 This will create a HetznerBareMetalHost YAML file: `1234567.yaml`
 
+The generated host starts with `spec.maintenanceMode: true`, and the command prints a hint to run `check-bm-servers` next.
+
 After that you can check if the rescue system is reachable reliably:
 
 ```console
 go run  github.com/syself/caphcli@latest check-bm-servers 1234567.yaml
 ```
+
+`check-bm-servers` refuses to run unless `spec.maintenanceMode` is `true`. After a successful check it prints a hint to disable maintenance mode again.
 
 <!-- readmegen:cli-help:start -->
 
