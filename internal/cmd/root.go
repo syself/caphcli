@@ -21,6 +21,7 @@ func NewRootCommand() *cobra.Command {
 	}
 
 	rootCmd.AddCommand(newCheckBMServersCommand())
+	rootCmd.AddCommand(newCreateHostYAMLCommand())
 
 	return rootCmd
 }
