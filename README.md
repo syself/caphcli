@@ -94,7 +94,7 @@ Flags:
       --timeout-reboot-os duration           Timeout for rebooting into installed OS (default 45s)
       --timeout-reboot-rescue duration       Timeout for requesting reboot to rescue (default 45s)
       --timeout-wait-os duration             Timeout for waiting until installed OS is reachable (default 6m0s)
-      --timeout-wait-rescue duration         Timeout for waiting until rescue SSH is reachable (default 6m0s)
+      --timeout-wait-rescue duration         Timeout for waiting until rescue SSH is reachable (default 8m0s)
 ```
 
 ### `caphcli create-host-yaml --help`
@@ -123,7 +123,7 @@ Flags:
       --timeout-fetch-server duration      Timeout for fetching server details from Robot (default 30s)
       --timeout-load-input duration        Timeout for env loading + initial validation (default 30s)
       --timeout-reboot-rescue duration     Timeout for requesting reboot to rescue (default 45s)
-      --timeout-wait-rescue duration       Timeout for waiting until rescue SSH is reachable (default 6m0s)
+      --timeout-wait-rescue duration       Timeout for waiting until rescue SSH is reachable (default 8m0s)
 ```
 
 <!-- readmegen:cli-help:end -->
