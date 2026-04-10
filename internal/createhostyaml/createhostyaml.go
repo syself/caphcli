@@ -586,7 +586,7 @@ func renderTemplate(server *models.Server, name string, disks []disk) string {
 		}
 		fmt.Fprintf(&b, "    # wwn: %q\n", disk.WWN)
 	}
-	b.WriteString("  maintenanceMode: false\n")
+	b.WriteString("  maintenanceMode: true\n")
 	fmt.Fprintf(&b, "  description: %q\n", defaultDescription(server))
 	return b.String()
 }

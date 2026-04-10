@@ -241,14 +241,6 @@ func Run(ctx context.Context, cfg Config) error {
 
 	r := newRunner(cfg)
 
-	// Load all local inputs first so parse and credential errors fail before any
-	// Robot API call or reboot on the target machine.
-	creds, err := loadEnvCredentials()
-	if err != nil {
-		return err
-	}
-	r.creds = creds
-
 	hosts, err := loadHostsFromHBMHYAMLFile(cfg.HbmhYAMLFile)
 	if err != nil {
 		return err
@@ -264,6 +256,14 @@ func Run(ctx context.Context, cfg Config) error {
 		return err
 	}
 	r.host = host
+
+	// Load credentials only after the selected host has passed local manifest
+	// validation, including the maintenance-mode safety gate.
+	creds, err := loadEnvCredentials()
+	if err != nil {
+		return err
+	}
+	r.creds = creds
 
 	// Ask for confirmation only after we know the exact host and WWNs that will
 	// be wiped by the provisioning loop.
@@ -363,6 +363,7 @@ func (r *runner) run(ctx context.Context) error {
 
 	_, _ = fmt.Fprintln(r.out)
 	r.logf("all checks passed: machine %q (serverID=%d) completed two rescue+install+boot cycles", r.host.Name, r.host.Spec.ServerID)
+	_, _ = fmt.Fprintf(r.out, "Hint: set spec.maintenanceMode back to false in %s now.\n", r.cfg.HbmhYAMLFile)
 	return nil
 }
 
@@ -792,8 +793,8 @@ func selectHost(hosts []infrav1.HetznerBareMetalHost, name string) (infrav1.Hetz
 	if name != "" {
 		for _, host := range hosts {
 			if host.Name == name {
-				if host.Spec.RootDeviceHints == nil {
-					return infrav1.HetznerBareMetalHost{}, fmt.Errorf("host %q has no spec.rootDeviceHints", host.Name)
+				if err := validateHostForProvisionCheck(host); err != nil {
+					return infrav1.HetznerBareMetalHost{}, err
 				}
 				return host, nil
 			}
@@ -816,10 +817,20 @@ func selectHost(hosts []infrav1.HetznerBareMetalHost, name string) (infrav1.Hetz
 	}
 
 	host := hosts[0]
-	if host.Spec.RootDeviceHints == nil {
-		return infrav1.HetznerBareMetalHost{}, fmt.Errorf("host %q has no spec.rootDeviceHints", host.Name)
+	if err := validateHostForProvisionCheck(host); err != nil {
+		return infrav1.HetznerBareMetalHost{}, err
 	}
 	return host, nil
+}
+
+func validateHostForProvisionCheck(host infrav1.HetznerBareMetalHost) error {
+	if host.Spec.RootDeviceHints == nil {
+		return fmt.Errorf("host %q has no spec.rootDeviceHints", host.Name)
+	}
+	if host.Spec.MaintenanceMode == nil || !*host.Spec.MaintenanceMode {
+		return fmt.Errorf("host %q must set spec.maintenanceMode: true before running check-bm-server", host.Name)
+	}
+	return nil
 }
 
 func listHostNames(hosts []infrav1.HetznerBareMetalHost) []string {

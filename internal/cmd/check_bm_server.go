@@ -10,20 +10,20 @@ import (
 	"github.com/syself/caphcli/internal/provisioncheck"
 )
 
-func newCheckBMServersCommand() *cobra.Command {
+func newCheckBMServerCommand() *cobra.Command {
 	cfg := provisioncheck.DefaultConfig()
 	cfg.Input = os.Stdin
 	cfg.Output = os.Stdout
 
 	cmd := &cobra.Command{
-		Use:   "check-bm-servers FILE",
+		Use:   "check-bm-server FILE",
 		Short: "Validate rescue and provisioning reliability for one bare-metal server",
 		Long: `Validate rescue and provisioning reliability for one HetznerBareMetalHost from a local YAML file.
 
 The command does not talk to Kubernetes. It reads one local YAML file containing
 HetznerBareMetalHost objects and then talks directly to Hetzner Robot plus the
 target server.`,
-		Example: `  caphcli check-bm-servers \
+		Example: `  caphcli check-bm-server \
     test/e2e/data/infrastructure-hetzner/v1beta1/bases/hetznerbaremetalhosts.yaml \
     --name bm-e2e-1731561`,
 		Args: cobra.ExactArgs(1),
@@ -35,7 +35,7 @@ target server.`,
 			}
 
 			if err := provisioncheck.Run(context.Background(), cfg); err != nil {
-				return fmt.Errorf("caphcli check-bm-servers failed for %q: %w", cfg.Name, err)
+				return fmt.Errorf("caphcli check-bm-server failed for %q: %w", cfg.Name, err)
 			}
 
 			return nil

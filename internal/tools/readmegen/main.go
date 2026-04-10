@@ -23,7 +23,7 @@ const generatedSectionTemplate = `## CLI Help
 {{ROOT_HELP}}
 ` + "```" + `
 
-### ` + "`caphcli check-bm-servers --help`" + `
+### ` + "`caphcli check-bm-server --help`" + `
 
 ` + "```text" + `
 {{CHECK_HELP}}
@@ -42,7 +42,7 @@ func main() {
 		fail(err)
 	}
 
-	checkHelp, err := renderHelp("check-bm-servers")
+	checkHelp, err := renderHelp("check-bm-server")
 	if err != nil {
 		fail(err)
 	}
