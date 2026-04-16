@@ -62,7 +62,7 @@ const (
 	// DefaultRebootToRescueTimeout is the default timeout for requesting the reboot into rescue.
 	DefaultRebootToRescueTimeout = 45 * time.Second
 	// DefaultWaitForRescueTimeout is the default timeout for waiting until rescue SSH is reachable.
-	DefaultWaitForRescueTimeout = 6 * time.Minute
+	DefaultWaitForRescueTimeout = 8 * time.Minute
 	// DefaultCheckDiskInRescueTimeout is the default timeout for smartctl disk checks in rescue.
 	DefaultCheckDiskInRescueTimeout = 1 * time.Minute
 	// DefaultInstallUbuntuTimeout is the default timeout for one installimage run.
@@ -72,8 +72,9 @@ const (
 	// DefaultWaitForOSTimeout is the default timeout for waiting until the installed OS is reachable.
 	DefaultWaitForOSTimeout = 6 * time.Minute
 
-	rescueHostName = "rescue"
-	sshPort        = 22
+	stepWarningThresholdPercent = 80.0
+	rescueHostName              = "rescue"
+	sshPort                     = 22
 )
 
 // Timeouts contains per-step timeouts for the provision check workflow.
@@ -1110,7 +1111,7 @@ func (r *runner) runStep(ctx context.Context, name string, timeout time.Duration
 		if used > 100 {
 			used = 100
 		}
-		msg := fmt.Sprintf(format, args...)
+		msg := fmt.Sprintf("%s%s", stepWarningPrefix(used), fmt.Sprintf(format, args...))
 		r.logf("step=%s state=running elapsed=%s used=%.1f%% remaining=%s %s",
 			name, formatMinSec(elapsed), used, formatMinSec(remaining), msg)
 	}
@@ -1149,6 +1150,14 @@ func (r *runner) logf(format string, args ...any) {
 		overall = formatMinSec(time.Since(r.startedAt))
 	}
 	_, _ = fmt.Fprintf(r.out, "overall=%s %s\n", overall, fmt.Sprintf(format, args...))
+}
+
+func stepWarningPrefix(used float64) string {
+	if used >= stepWarningThresholdPercent {
+		return "⚠️ "
+	}
+
+	return ""
 }
 
 func formatMinSec(d time.Duration) string {

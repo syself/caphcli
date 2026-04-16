@@ -21,9 +21,54 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	infrav1 "github.com/syself/cluster-api-provider-hetzner/api/v1beta1"
 )
+
+func TestDefaultConfigWaitForRescueTimeout(t *testing.T) {
+	t.Parallel()
+
+	if got, want := DefaultConfig().Timeouts.WaitForRescue, 8*time.Minute; got != want {
+		t.Fatalf("DefaultConfig().Timeouts.WaitForRescue = %s, want %s", got, want)
+	}
+}
+
+func TestStepWarningPrefix(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		used float64
+		want string
+	}{
+		{
+			name: "below threshold",
+			used: 79.9,
+			want: "",
+		},
+		{
+			name: "at threshold",
+			used: 80.0,
+			want: "⚠️ ",
+		},
+		{
+			name: "above threshold",
+			used: 95.5,
+			want: "⚠️ ",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := stepWarningPrefix(tt.used); got != tt.want {
+				t.Fatalf("stepWarningPrefix(%v) = %q, want %q", tt.used, got, tt.want)
+			}
+		})
+	}
+}
 
 func TestLoadHostsFromHBMHYAMLFile(t *testing.T) {
 	t.Parallel()
