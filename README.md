@@ -86,6 +86,7 @@ Flags:
       --name string                          HetznerBareMetalHost metadata.name. Optional if YAML contains exactly one host
       --poll-interval duration               Polling interval for wait steps (default 10s)
       --timeout-activate-rescue duration     Timeout for activating rescue boot (default 45s)
+      --timeout-check-all-disks duration     Timeout for checking health of all disks in rescue (pass 1 only) (default 3m0s)
       --timeout-check-disk-rescue duration   Timeout for checking target disks in rescue (default 1m0s)
       --timeout-ensure-ssh-key duration      Timeout for ensuring SSH key in Robot (default 1m0s)
       --timeout-fetch-server duration        Timeout for fetching server details from Robot (default 30s)
