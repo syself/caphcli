@@ -80,22 +80,21 @@ Examples:
     --name bm-e2e-1731561
 
 Flags:
-      --force                                Skip the destructive-action confirmation prompt
-  -h, --help                                 help for check-bm-server
-      --image-path string                    Installimage IMAGE path for operating system inside the Hetzner rescue system (default "/root/.oldroot/nfs/images/Ubuntu-2404-noble-amd64-base.tar.gz")
-      --name string                          HetznerBareMetalHost metadata.name. Optional if YAML contains exactly one host
-      --poll-interval duration               Polling interval for wait steps (default 10s)
-      --timeout-activate-rescue duration     Timeout for activating rescue boot (default 45s)
-      --timeout-check-all-disks duration     Timeout for checking health of all disks in rescue (pass 1 only) (default 3m0s)
-      --timeout-check-disk-rescue duration   Timeout for checking target disks in rescue (default 1m0s)
-      --timeout-ensure-ssh-key duration      Timeout for ensuring SSH key in Robot (default 1m0s)
-      --timeout-fetch-server duration        Timeout for fetching server details from Robot (default 30s)
-      --timeout-install duration             Timeout for one Ubuntu install step (default 9m0s)
-      --timeout-load-input duration          Timeout for input parsing + env loading (default 30s)
-      --timeout-reboot-os duration           Timeout for rebooting into installed OS (default 45s)
-      --timeout-reboot-rescue duration       Timeout for requesting reboot to rescue (default 45s)
-      --timeout-wait-os duration             Timeout for waiting until installed OS is reachable (default 6m0s)
-      --timeout-wait-rescue duration         Timeout for waiting until rescue SSH is reachable (default 8m0s)
+      --force                              Skip the destructive-action confirmation prompt
+  -h, --help                               help for check-bm-server
+      --image-path string                  Installimage IMAGE path for operating system inside the Hetzner rescue system (default "/root/.oldroot/nfs/images/Ubuntu-2404-noble-amd64-base.tar.gz")
+      --name string                        HetznerBareMetalHost metadata.name. Optional if YAML contains exactly one host
+      --poll-interval duration             Polling interval for wait steps (default 10s)
+      --timeout-activate-rescue duration   Timeout for activating rescue boot (default 45s)
+      --timeout-check-all-disks duration   Timeout for checking health of all disks in rescue (pass 1 only) (default 3m0s)
+      --timeout-ensure-ssh-key duration    Timeout for ensuring SSH key in Robot (default 1m0s)
+      --timeout-fetch-server duration      Timeout for fetching server details from Robot (default 30s)
+      --timeout-install duration           Timeout for one Ubuntu install step (default 9m0s)
+      --timeout-load-input duration        Timeout for input parsing + env loading (default 30s)
+      --timeout-reboot-os duration         Timeout for rebooting into installed OS (default 45s)
+      --timeout-reboot-rescue duration     Timeout for requesting reboot to rescue (default 45s)
+      --timeout-wait-os duration           Timeout for waiting until installed OS is reachable (default 6m0s)
+      --timeout-wait-rescue duration       Timeout for waiting until rescue SSH is reachable (default 8m0s)
 ```
 
 ### `caphcli create-host-yaml --help`
