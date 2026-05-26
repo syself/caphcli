@@ -79,16 +79,16 @@ const (
 
 // Timeouts contains per-step timeouts for the provision check workflow.
 type Timeouts struct {
-	LoadInput          time.Duration
-	EnsureSSHKey       time.Duration
-	FetchServerDetails time.Duration
-	ActivateRescue     time.Duration
-	RebootToRescue     time.Duration
-	WaitForRescue        time.Duration
+	LoadInput           time.Duration
+	EnsureSSHKey        time.Duration
+	FetchServerDetails  time.Duration
+	ActivateRescue      time.Duration
+	RebootToRescue      time.Duration
+	WaitForRescue       time.Duration
 	CheckAllDisksHealth time.Duration
-	InstallUbuntu      time.Duration
-	RebootToOS         time.Duration
-	WaitForOS          time.Duration
+	InstallUbuntu       time.Duration
+	RebootToOS          time.Duration
+	WaitForOS           time.Duration
 }
 
 // Config configures the provision check run.
@@ -109,16 +109,16 @@ func DefaultConfig() Config {
 		ImagePath:    DefaultUbuntu2404ImagePath,
 		PollInterval: DefaultPollInterval,
 		Timeouts: Timeouts{
-			LoadInput:          DefaultLoadInputTimeout,
-			EnsureSSHKey:       DefaultEnsureSSHKeyTimeout,
-			FetchServerDetails: DefaultFetchServerDetailsTimeout,
-			ActivateRescue:     DefaultActivateRescueTimeout,
-			RebootToRescue:     DefaultRebootToRescueTimeout,
+			LoadInput:           DefaultLoadInputTimeout,
+			EnsureSSHKey:        DefaultEnsureSSHKeyTimeout,
+			FetchServerDetails:  DefaultFetchServerDetailsTimeout,
+			ActivateRescue:      DefaultActivateRescueTimeout,
+			RebootToRescue:      DefaultRebootToRescueTimeout,
 			WaitForRescue:       DefaultWaitForRescueTimeout,
 			CheckAllDisksHealth: DefaultCheckAllDisksHealthTimeout,
-			InstallUbuntu:      DefaultInstallUbuntuTimeout,
-			RebootToOS:         DefaultRebootToOSTimeout,
-			WaitForOS:          DefaultWaitForOSTimeout,
+			InstallUbuntu:       DefaultInstallUbuntuTimeout,
+			RebootToOS:          DefaultRebootToOSTimeout,
+			WaitForOS:           DefaultWaitForOSTimeout,
 		},
 		Input:  os.Stdin,
 		Output: os.Stdout,
