@@ -53,6 +53,7 @@ target server.`,
 	flags.DurationVar(&cfg.Timeouts.ActivateRescue, "timeout-activate-rescue", provisioncheck.DefaultActivateRescueTimeout, "Timeout for activating rescue boot")
 	flags.DurationVar(&cfg.Timeouts.RebootToRescue, "timeout-reboot-rescue", provisioncheck.DefaultRebootToRescueTimeout, "Timeout for requesting reboot to rescue")
 	flags.DurationVar(&cfg.Timeouts.WaitForRescue, "timeout-wait-rescue", provisioncheck.DefaultWaitForRescueTimeout, "Timeout for waiting until rescue SSH is reachable")
+	flags.DurationVar(&cfg.Timeouts.CheckAllDisksHealth, "timeout-check-all-disks", provisioncheck.DefaultCheckAllDisksHealthTimeout, "Timeout for checking health of all disks in rescue (pass 1 only)")
 	flags.DurationVar(&cfg.Timeouts.CheckDiskInRescue, "timeout-check-disk-rescue", provisioncheck.DefaultCheckDiskInRescueTimeout, "Timeout for checking target disks in rescue")
 	flags.DurationVar(&cfg.Timeouts.InstallUbuntu, "timeout-install", provisioncheck.DefaultInstallUbuntuTimeout, "Timeout for one Ubuntu install step")
 	flags.DurationVar(&cfg.Timeouts.RebootToOS, "timeout-reboot-os", provisioncheck.DefaultRebootToOSTimeout, "Timeout for rebooting into installed OS")
