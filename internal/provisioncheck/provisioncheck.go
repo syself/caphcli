@@ -717,7 +717,7 @@ func ensureInstallImageBinary(ssh sshclient.Client, progress stepProgress) error
 
 func ensureRobotSSHKey(cli robotclient.Client, keyName, publicKey string) (string, error) {
 	keys, err := cli.ListSSHKeys()
-	if err != nil {
+	if err != nil && !models.IsError(err, models.ErrorCodeNotFound) {
 		return "", fmt.Errorf("list ssh keys: %w", err)
 	}
 	for _, key := range keys {
