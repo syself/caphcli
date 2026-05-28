@@ -521,7 +521,7 @@ func (r *runner) cycle(ctx context.Context, pass int) error {
 func (r *runner) refreshServerIP(_ context.Context, progress stepProgress) error {
 	server, err := r.robotClient.GetBMServer(r.host.Spec.ServerID)
 	if err != nil {
-		return fmt.Errorf("get robot server %d: %w", r.host.Spec.ServerID, err)
+		return fmt.Errorf("get robot server %d: %w\nHint: using Robot user %q - is this the correct Robot user?", r.host.Spec.ServerID, err, r.creds.robotUser)
 	}
 	if server.ServerIP == "" {
 		return fmt.Errorf("server %d has empty server_ip in Robot API", r.host.Spec.ServerID)
