@@ -63,8 +63,8 @@ const (
 	DefaultRebootToRescueTimeout = 45 * time.Second
 	// DefaultWaitForRescueTimeout is the default timeout for waiting until rescue SSH is reachable.
 	DefaultWaitForRescueTimeout = 8 * time.Minute
-	// DefaultCheckDiskInRescueTimeout is the default timeout for smartctl disk checks in rescue.
-	DefaultCheckDiskInRescueTimeout = 1 * time.Minute
+	// DefaultCheckAllDisksHealthTimeout is the default timeout for the all-disk health check in rescue.
+	DefaultCheckAllDisksHealthTimeout = 3 * time.Minute
 	// DefaultInstallUbuntuTimeout is the default timeout for one installimage run.
 	DefaultInstallUbuntuTimeout = 9 * time.Minute
 	// DefaultRebootToOSTimeout is the default timeout for rebooting into the installed OS.
@@ -79,16 +79,16 @@ const (
 
 // Timeouts contains per-step timeouts for the provision check workflow.
 type Timeouts struct {
-	LoadInput          time.Duration
-	EnsureSSHKey       time.Duration
-	FetchServerDetails time.Duration
-	ActivateRescue     time.Duration
-	RebootToRescue     time.Duration
-	WaitForRescue      time.Duration
-	CheckDiskInRescue  time.Duration
-	InstallUbuntu      time.Duration
-	RebootToOS         time.Duration
-	WaitForOS          time.Duration
+	LoadInput           time.Duration
+	EnsureSSHKey        time.Duration
+	FetchServerDetails  time.Duration
+	ActivateRescue      time.Duration
+	RebootToRescue      time.Duration
+	WaitForRescue       time.Duration
+	CheckAllDisksHealth time.Duration
+	InstallUbuntu       time.Duration
+	RebootToOS          time.Duration
+	WaitForOS           time.Duration
 }
 
 // Config configures the provision check run.
@@ -109,16 +109,16 @@ func DefaultConfig() Config {
 		ImagePath:    DefaultUbuntu2404ImagePath,
 		PollInterval: DefaultPollInterval,
 		Timeouts: Timeouts{
-			LoadInput:          DefaultLoadInputTimeout,
-			EnsureSSHKey:       DefaultEnsureSSHKeyTimeout,
-			FetchServerDetails: DefaultFetchServerDetailsTimeout,
-			ActivateRescue:     DefaultActivateRescueTimeout,
-			RebootToRescue:     DefaultRebootToRescueTimeout,
-			WaitForRescue:      DefaultWaitForRescueTimeout,
-			CheckDiskInRescue:  DefaultCheckDiskInRescueTimeout,
-			InstallUbuntu:      DefaultInstallUbuntuTimeout,
-			RebootToOS:         DefaultRebootToOSTimeout,
-			WaitForOS:          DefaultWaitForOSTimeout,
+			LoadInput:           DefaultLoadInputTimeout,
+			EnsureSSHKey:        DefaultEnsureSSHKeyTimeout,
+			FetchServerDetails:  DefaultFetchServerDetailsTimeout,
+			ActivateRescue:      DefaultActivateRescueTimeout,
+			RebootToRescue:      DefaultRebootToRescueTimeout,
+			WaitForRescue:       DefaultWaitForRescueTimeout,
+			CheckAllDisksHealth: DefaultCheckAllDisksHealthTimeout,
+			InstallUbuntu:       DefaultInstallUbuntuTimeout,
+			RebootToOS:          DefaultRebootToOSTimeout,
+			WaitForOS:           DefaultWaitForOSTimeout,
 		},
 		Input:  os.Stdin,
 		Output: os.Stdout,
@@ -159,8 +159,8 @@ func (cfg Config) withDefaults() Config {
 	if cfg.Timeouts.WaitForRescue == 0 {
 		cfg.Timeouts.WaitForRescue = defaults.Timeouts.WaitForRescue
 	}
-	if cfg.Timeouts.CheckDiskInRescue == 0 {
-		cfg.Timeouts.CheckDiskInRescue = defaults.Timeouts.CheckDiskInRescue
+	if cfg.Timeouts.CheckAllDisksHealth == 0 {
+		cfg.Timeouts.CheckAllDisksHealth = defaults.Timeouts.CheckAllDisksHealth
 	}
 	if cfg.Timeouts.InstallUbuntu == 0 {
 		cfg.Timeouts.InstallUbuntu = defaults.Timeouts.InstallUbuntu
@@ -210,7 +210,7 @@ func (cfg Config) Validate() error {
 	if err := validateTimeout("--timeout-wait-rescue", cfg.Timeouts.WaitForRescue); err != nil {
 		return err
 	}
-	if err := validateTimeout("--timeout-check-disk-rescue", cfg.Timeouts.CheckDiskInRescue); err != nil {
+	if err := validateTimeout("--timeout-check-all-disks", cfg.Timeouts.CheckAllDisksHealth); err != nil {
 		return err
 	}
 	if err := validateTimeout("--timeout-install", cfg.Timeouts.InstallUbuntu); err != nil {
@@ -459,13 +459,15 @@ func (r *runner) cycle(ctx context.Context, pass int) error {
 		return err
 	}
 
-	err = r.runStep(ctx, fmt.Sprintf("pass-%d-check-disk-in-rescue", pass), r.cfg.Timeouts.CheckDiskInRescue,
-		func(stepCtx context.Context, progress stepProgress) error {
-			ssh := r.newRescueSSHClient()
-			return r.checkDiskInRescue(stepCtx, ssh, progress)
-		})
-	if err != nil {
-		return err
+	if pass == 1 {
+		err = r.runStep(ctx, "pass-1-check-all-disks-health", r.cfg.Timeouts.CheckAllDisksHealth,
+			func(stepCtx context.Context, progress stepProgress) error {
+				ssh := r.newRescueSSHClient()
+				return r.checkAllDisksHealth(stepCtx, ssh, progress)
+			})
+		if err != nil {
+			return err
+		}
 	}
 
 	err = r.runStep(ctx, fmt.Sprintf("pass-%d-install-ubuntu-24.04", pass), r.cfg.Timeouts.InstallUbuntu,
@@ -519,7 +521,7 @@ func (r *runner) cycle(ctx context.Context, pass int) error {
 func (r *runner) refreshServerIP(_ context.Context, progress stepProgress) error {
 	server, err := r.robotClient.GetBMServer(r.host.Spec.ServerID)
 	if err != nil {
-		return fmt.Errorf("get robot server %d: %w", r.host.Spec.ServerID, err)
+		return fmt.Errorf("get robot server %d: %w\nHint: using Robot user %q - is this the correct Robot user?", r.host.Spec.ServerID, err, r.creds.robotUser)
 	}
 	if server.ServerIP == "" {
 		return fmt.Errorf("server %d has empty server_ip in Robot API", r.host.Spec.ServerID)
@@ -625,18 +627,35 @@ func (r *runner) runInstall(ctx context.Context, ssh sshclient.Client, progress 
 	})
 }
 
-func (r *runner) checkDiskInRescue(ctx context.Context, ssh sshclient.Client, progress stepProgress) error {
-	rootWWNs := r.host.Spec.RootDeviceHints.ListOfWWN()
-	if len(rootWWNs) == 0 {
-		return errors.New("rootDeviceHints are required in the input HBMH")
+func (r *runner) checkAllDisksHealth(ctx context.Context, ssh sshclient.Client, progress stepProgress) error {
+	out := ssh.GetHardwareDetailsStorage()
+	if out.Err != nil {
+		return fmt.Errorf("get storage details: %w", out.Err)
+	}
+	if strings.TrimSpace(out.StdOut) == "" {
+		return errors.New("storage output is empty")
 	}
 
-	diskInfo, err := ssh.CheckDisk(ctx, rootWWNs)
+	var allWWNs []string
+	for _, line := range strings.Split(strings.TrimSpace(out.StdOut), "\n") {
+		var s storageDetails
+		if err := json.Unmarshal([]byte(validJSONFromSSHOutput(line)), &s); err != nil {
+			return fmt.Errorf("parse lsblk line %q: %w", line, err)
+		}
+		if s.Type == "disk" && normalizeWWN(s.WWN) != "" {
+			allWWNs = append(allWWNs, s.WWN)
+		}
+	}
+
+	if len(allWWNs) == 0 {
+		return errors.New("no disk WWNs found — cannot run all-disk health check")
+	}
+
+	diskInfo, err := ssh.CheckDisk(ctx, allWWNs)
 	if err != nil {
-		return fmt.Errorf("check-disk failed: %w", err)
+		return fmt.Errorf("check-all-disks failed: %w", err)
 	}
-
-	progress("check-disk ok: %s", strings.TrimSpace(diskInfo))
+	progress("check-all-disks ok:\n%s", strings.TrimSpace(diskInfo))
 	return nil
 }
 
@@ -698,7 +717,7 @@ func ensureInstallImageBinary(ssh sshclient.Client, progress stepProgress) error
 
 func ensureRobotSSHKey(cli robotclient.Client, keyName, publicKey string) (string, error) {
 	keys, err := cli.ListSSHKeys()
-	if err != nil {
+	if err != nil && !models.IsError(err, models.ErrorCodeNotFound) {
 		return "", fmt.Errorf("list ssh keys: %w", err)
 	}
 	for _, key := range keys {
