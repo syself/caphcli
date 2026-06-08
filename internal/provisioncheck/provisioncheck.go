@@ -628,7 +628,11 @@ func (r *runner) runInstall(ctx context.Context, ssh sshclient.Client, progress 
 				return false, "", fmt.Errorf("read installimage result: %w\ncollected install logs:\n%s", err, logs)
 			}
 			if !strings.Contains(result, hostpkg.PostInstallScriptFinished) {
-				return false, "", fmt.Errorf("installimage finished without marker %q", hostpkg.PostInstallScriptFinished)
+				logs, logErr := collectInstallLogs(ctx, ssh)
+				if logErr != nil {
+					return false, "", fmt.Errorf("installimage finished without marker %q (failed to collect logs: %v)", hostpkg.PostInstallScriptFinished, logErr)
+				}
+				return false, "", fmt.Errorf("installimage finished without marker %q\ncollected install logs:\n%s", hostpkg.PostInstallScriptFinished, logs)
 			}
 			return true, "installimage finished and marker found", nil
 		default:
