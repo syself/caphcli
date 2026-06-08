@@ -82,7 +82,7 @@ Examples:
 Flags:
       --force                              Skip the destructive-action confirmation prompt
   -h, --help                               help for check-bm-server
-      --image-path string                  Installimage IMAGE path for operating system inside the Hetzner rescue system (default "/root/.oldroot/nfs/images/Ubuntu-2404-noble-amd64-base.tar.gz")
+      --image-path string                  Installimage IMAGE path for operating system inside the Hetzner rescue system (default "/root/.oldroot/nfs/images/Ubuntu-2404-noble-amd64-base.tar.zst")
       --name string                        HetznerBareMetalHost metadata.name. Optional if YAML contains exactly one host
       --poll-interval duration             Polling interval for wait steps (default 10s)
       --timeout-activate-rescue duration   Timeout for activating rescue boot (default 45s)
