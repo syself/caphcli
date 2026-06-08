@@ -30,6 +30,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -620,6 +621,7 @@ func (r *runner) runInstall(ctx context.Context, ssh sshclient.Client, progress 
 			return false, "installimage not started yet", nil
 		case sshclient.InstallImageStateFinished:
 			result, err := ssh.GetResultOfInstallImage()
+			result = stripTerminalCodes(result)
 			if err != nil {
 				logs, logErr := collectInstallLogs(ctx, ssh)
 				if logErr != nil {
@@ -711,7 +713,7 @@ ps aux | grep installimage | grep -v grep || true
 	if exitStatus != 0 {
 		return "", fmt.Errorf("collect install logs exit=%d output=%q", exitStatus, output)
 	}
-	return output, nil
+	return stripTerminalCodes(output), nil
 }
 
 func ensureInstallImageBinary(ssh sshclient.Client, progress stepProgress) error {
@@ -1201,6 +1203,15 @@ func formatMinSec(d time.Duration) string {
 	minutes := seconds / 60
 	secs := seconds % 60
 	return fmt.Sprintf("%dm%02ds", minutes, secs)
+}
+
+// ansiEscape matches ANSI/VT100 escape sequences including terminal reset (ESC c).
+var ansiEscape = regexp.MustCompile(`\x1b(\[[0-9;?]*[a-zA-Z]|[a-zA-Z])`)
+
+// stripTerminalCodes removes ANSI escape sequences from s so log output
+// doesn't reset or clear the user's terminal.
+func stripTerminalCodes(s string) string {
+	return ansiEscape.ReplaceAllString(s, "")
 }
 
 // ParseServerIDFromName extracts the numeric server ID from names like bm-e2e-1751550.
