@@ -266,7 +266,21 @@ func Run(ctx context.Context, cfg Config) error {
 	}
 	r.creds = creds
 
-	// Ask for confirmation only after we know the exact host and WWNs that will
+	r.robotClient = robotclient.NewFactory().NewClient(robotclient.Credentials{
+		Username: r.creds.robotUser,
+		Password: r.creds.robotPass,
+	})
+
+	server, err := r.robotClient.GetBMServer(r.host.Spec.ServerID)
+	if err != nil {
+		return fmt.Errorf("get robot server %d: %w\nHint: using Robot user %q - is this the correct Robot user?", r.host.Spec.ServerID, err, r.creds.robotUser)
+	}
+	if server.ServerIP == "" {
+		return fmt.Errorf("server %d has empty server_ip in Robot API", r.host.Spec.ServerID)
+	}
+	r.serverIP = server.ServerIP
+
+	// Ask for confirmation only after we know the exact host, WWNs, and IP that will
 	// be wiped by the provisioning loop.
 	if err := r.confirmDestructiveAction(); err != nil {
 		return err
@@ -330,11 +344,6 @@ func (r *runner) run(ctx context.Context) error {
 		return err
 	}
 
-	r.robotClient = robotclient.NewFactory().NewClient(robotclient.Credentials{
-		Username: r.creds.robotUser,
-		Password: r.creds.robotPass,
-	})
-
 	err = r.runStep(ctx, "ensure-robot-ssh-key", r.cfg.Timeouts.EnsureSSHKey, func(_ context.Context, progress stepProgress) error {
 		fingerprint, err := ensureRobotSSHKey(r.robotClient, r.creds.sshKeyName, r.creds.sshPub)
 		if err != nil {
@@ -380,10 +389,11 @@ func (r *runner) confirmDestructiveAction() error {
 	}
 
 	_, err := fmt.Fprintf(r.out,
-		"WARNING: this will delete all data on disks with WWN(s): %s\nhost %q (serverID=%d) \nType \"yes\" to continue: ",
+		"WARNING: this will delete all data on disks with WWN(s): %s\nhost %q (serverID=%d, ip=%s)\nType \"yes\" to continue: ",
 		strings.Join(rootWWNs, ", "),
 		r.host.Name,
 		r.host.Spec.ServerID,
+		r.serverIP,
 	)
 	if err != nil {
 		return fmt.Errorf("write confirmation prompt: %w", err)
