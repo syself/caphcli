@@ -47,7 +47,7 @@ import (
 const (
 	// DefaultUbuntu2404ImagePath is the stock Ubuntu 24.04 image path exposed by
 	// Hetzner's rescue environment for installimage.
-	DefaultUbuntu2404ImagePath = "/root/.oldroot/nfs/images/Ubuntu-2404-noble-amd64-base.tar.gz"
+	DefaultUbuntu2404ImagePath = "/root/.oldroot/nfs/images/Ubuntu-2404-noble-amd64-base.tar.zst"
 
 	// DefaultPollInterval is the default polling interval for wait steps.
 	DefaultPollInterval = 10 * time.Second
@@ -628,7 +628,11 @@ func (r *runner) runInstall(ctx context.Context, ssh sshclient.Client, progress 
 				return false, "", fmt.Errorf("read installimage result: %w\ncollected install logs:\n%s", err, logs)
 			}
 			if !strings.Contains(result, hostpkg.PostInstallScriptFinished) {
-				return false, "", fmt.Errorf("installimage finished without marker %q", hostpkg.PostInstallScriptFinished)
+				logs, logErr := collectInstallLogs(ctx, ssh)
+				if logErr != nil {
+					return false, "", fmt.Errorf("installimage finished without marker %q (failed to collect logs: %v)", hostpkg.PostInstallScriptFinished, logErr)
+				}
+				return false, "", fmt.Errorf("installimage finished without marker %q\ncollected install logs:\n%s", hostpkg.PostInstallScriptFinished, logs)
 			}
 			return true, "installimage finished and marker found", nil
 		default:
