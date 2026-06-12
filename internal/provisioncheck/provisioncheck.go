@@ -879,24 +879,35 @@ func listHostNames(hosts []infrav1.HetznerBareMetalHost) []string {
 }
 
 func loadEnvCredentials() (envCredentials, error) {
+	var errs []string
+
 	user := strings.TrimSpace(os.Getenv("HETZNER_ROBOT_USER"))
+	if user == "" {
+		errs = append(errs, "HETZNER_ROBOT_USER is required")
+	}
+
 	pass := strings.TrimSpace(os.Getenv("HETZNER_ROBOT_PASSWORD"))
-	if user == "" || pass == "" {
-		return envCredentials{}, errors.New("HETZNER_ROBOT_USER and HETZNER_ROBOT_PASSWORD are required")
+	if pass == "" {
+		errs = append(errs, "HETZNER_ROBOT_PASSWORD is required")
 	}
 
 	keyName := strings.TrimSpace(os.Getenv("SSH_KEY_NAME"))
 	if keyName == "" {
-		return envCredentials{}, errors.New("SSH_KEY_NAME is required")
+		errs = append(errs, "SSH_KEY_NAME is required")
 	}
 
-	sshPub, err := loadKeyMaterial("HETZNER_SSH_PUB_PATH", "HETZNER_SSH_PUB")
-	if err != nil {
-		return envCredentials{}, fmt.Errorf("load public key: %w", err)
+	sshPub, pubErr := loadKeyMaterial("HETZNER_SSH_PUB_PATH", "HETZNER_SSH_PUB")
+	if pubErr != nil {
+		errs = append(errs, fmt.Sprintf("load public key: %v", pubErr))
 	}
-	sshPriv, err := loadKeyMaterial("HETZNER_SSH_PRIV_PATH", "HETZNER_SSH_PRIV")
-	if err != nil {
-		return envCredentials{}, fmt.Errorf("load private key: %w", err)
+
+	sshPriv, privErr := loadKeyMaterial("HETZNER_SSH_PRIV_PATH", "HETZNER_SSH_PRIV")
+	if privErr != nil {
+		errs = append(errs, fmt.Sprintf("load private key: %v", privErr))
+	}
+
+	if len(errs) > 0 {
+		return envCredentials{}, errors.New(strings.Join(errs, "\n"))
 	}
 
 	return envCredentials{
