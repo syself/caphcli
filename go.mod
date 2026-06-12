@@ -5,7 +5,7 @@ go 1.25.7
 require (
 	github.com/go-logr/logr v1.4.3
 	github.com/spf13/cobra v1.10.2
-	github.com/syself/cluster-api-provider-hetzner v1.1.6-0.20260612065216-2ff55b0bbb4d
+	github.com/syself/cluster-api-provider-hetzner v1.1.6-0.20260612074652-5946bd57c519
 	github.com/syself/hrobot-go v0.2.7
 	k8s.io/apimachinery v0.35.5
 	sigs.k8s.io/controller-runtime v0.23.3
@@ -55,6 +55,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.50.0 // indirect
+	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39 // indirect
 	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
