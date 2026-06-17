@@ -160,8 +160,6 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/syself/cluster-api-provider-hetzner v1.1.6-0.20260612065216-2ff55b0bbb4d h1:RPHiATIDefeQjMgC6CCnWt2CYdrJI56NStukmVqfcmo=
-github.com/syself/cluster-api-provider-hetzner v1.1.6-0.20260612065216-2ff55b0bbb4d/go.mod h1:Fn5RuVrXoR+9OOQNu+wEGZJDKrLOgpz3tKL/KenB5YQ=
 github.com/syself/cluster-api-provider-hetzner v1.1.6-0.20260612074652-5946bd57c519 h1:Z7ho0Ygsh5CWm/ZZ0i6eB2NpBgt90mNI8xqjRk/mvOU=
 github.com/syself/cluster-api-provider-hetzner v1.1.6-0.20260612074652-5946bd57c519/go.mod h1:Fn5RuVrXoR+9OOQNu+wEGZJDKrLOgpz3tKL/KenB5YQ=
 github.com/syself/hrobot-go v0.2.7 h1:1TeFGifXnsAr0u2ZdbH88kazcqmuQHaKgM81p29XkQo=
